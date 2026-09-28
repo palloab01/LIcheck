@@ -156,7 +156,7 @@
     <h1>Franchise Ownership Outreach Assistant</h1>
 
     <div class="status-banner">
-        ⚡ Direct Pipeline Mode Enabled
+        ⚡ Pipeline Interface Operational
     </div>
 
     <div class="config-bar">
@@ -196,7 +196,6 @@
 </div>
 
 <script>
-    // Direct network connection implementation bypassed from standard wrapper constraints
     const MY_API_KEY = "AQ.Ab8RN6la5c5LNALMhqt-9bon-AdYl_dKoJXvVWmK8CbevztqA";
 
     async function processOutreach() {
@@ -215,7 +214,6 @@
         outputDiv.className = "result-box loading";
         outputDiv.innerText = `Connecting directly to Google AI servers via REST...`;
 
-        // Direct endpoint targeting stable v1beta architecture matching the token generation sequence
         const endpointUrl = `https://googleapis.com{MY_API_KEY}`;
         
         const systemPrompt = `You are a LinkedIn franchise ownership outreach assistant. Your role is to analyze prospect files or ongoing threads and apply the exact operational workflows provided.
@@ -261,3 +259,7 @@ If mode is [DM]:
 - Rules: If original invite already brought up franchise ownership, do not repeat the full pitch. 
 - Format:
 Hi [Name], thanks for connecting!
+The client I mentioned is ${client}. ${client} works with experienced business owners and executives to evaluate established franchise opportunities across hundreds of brands, including semi-absentee models that align with their goals, lifestyle, and existing commitments.
+[Personalized sentence highlighting career relevance.]
+Would you be open to learning more?
+
