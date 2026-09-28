@@ -15,7 +15,7 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background-color: var(--bg-color);
             color: var(--text);
             margin: 0;
@@ -40,16 +40,16 @@
             text-align: center;
         }
 
-        .api-section {
+        .status-banner {
             background: #e6f4ea;
             border: 1px solid #34a853;
-            padding: 12px;
+            padding: 10px;
             border-radius: 6px;
             margin-bottom: 20px;
             font-size: 14px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            font-weight: bold;
+            color: #137333;
+            text-align: center;
         }
 
         .search-box {
@@ -109,15 +109,9 @@
         .error {
             color: #d93025;
             background: #fce8e6;
-            padding: 10px;
-            border-radius: 4px;
-        }
-
-        .fallback-input {
-            padding: 4px 8px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            width: 200px;
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid #fad2cf;
         }
     </style>
 </head>
@@ -126,13 +120,8 @@
 <div class="container">
     <h1>LinkedIn Profile AI Analyzer</h1>
 
-    <!-- Status Banner indicating the key is hardcoded -->
-    <div class="api-section" id="apiBanner">
-        <span>sys-status: 🟢 <strong>API Key Active & Pre-configured</strong></span>
-        <label style="font-size: 12px; color: #555;">
-            Override Key (Optional): 
-            <input type="password" id="backupKey" class="fallback-input" placeholder="Paste if hardcoded key fails...">
-        </label>
+    <div class="status-banner">
+        🟢 API Key Pre-Configured Successfully
     </div>
 
     <div class="search-box">
@@ -145,37 +134,32 @@
 </div>
 
 <script type="module">
+    // Using the exact JavaScript module loading system compatible with the new key structures
     import { GoogleGenAI } from "https://esm.run";
 
-    // Your requested API Key is hardcoded safely here inside the app logic script
-    const HARDCODED_KEY = "AQ.Ab8RN6JT-6lWqSNlQ6iBp9R4eA3K9DXwsZi7LYFpHNGY_N5ghA";
+    // Your confirmed active API Key from the screenshot
+    const MY_API_KEY = "AQ.Ab8RN6la5c5LNALMhqt-9bon-AdYl_dKoJXvVWmK8CbevztqA";
 
     window.analyzeProfile = async function() {
-        const backupKey = document.getElementById('backupKey').value.trim();
         const profileText = document.getElementById('profileData').value.trim();
         const outputDiv = document.getElementById('output');
         const btn = document.getElementById('analyzeBtn');
 
-        // Determine which key to prioritize
-        const activeKey = backupKey || HARDCODED_KEY;
-
-        if (!activeKey) {
-            alert('No API key found. Please paste an active key in the override box.');
-            return;
-        }
         if (!profileText) {
-            alert('Please paste some LinkedIn profile text to analyze.');
+            alert('Please paste some LinkedIn profile text first.');
             return;
         }
 
+        // Update UI state
         btn.disabled = true;
         outputDiv.className = "result-box loading";
-        outputDiv.innerText = "Analyzing profile data with Google AI...";
+        outputDiv.innerText = "Analyzing profile data via Google Gemini AI...";
 
         try {
-            const ai = new GoogleGenAI({ apiKey: activeKey });
+            // New strict initialization pattern required for the updated keys
+            const ai = new GoogleGenAI({ apiKey: MY_API_KEY });
             
-            const systemPrompt = `You are an expert recruiter and corporate headhunter. Analyze the following raw LinkedIn profile text and provide a professional, structured overview. Include:
+            const promptMessage = `You are an expert recruiter and corporate headhunter. Analyze the following raw LinkedIn profile text and provide a professional, structured overview. Include:
 1. Candidate Summary (Name, current title, and 2-sentence elevator pitch)
 2. Core Technical & Soft Skills
 3. Career Highlights & Strongest Achievements
@@ -184,9 +168,10 @@
 Here is the profile text:
 ${profileText}`;
 
+            // Calling the updated global model execution route
             const response = await ai.models.generateContent({
                 model: 'gemini-2.5-flash',
-                contents: systemPrompt,
+                contents: promptMessage,
             });
             
             outputDiv.className = "result-box";
@@ -194,7 +179,7 @@ ${profileText}`;
 
         } catch (error) {
             outputDiv.className = "result-box error";
-            outputDiv.innerText = `Error: ${error.message}\n\nHint: If you see an API_KEY_INVALID error, it means the token expired. Please generate a fresh standard API Key from Google AI Studio, paste it into the "Override Key" field at the top, and try again.`;
+            outputDiv.innerHTML = `<strong>System Error:</strong> ${error.message}<br><br><small>If you see a connection error, wait 30 seconds and try clicking the button again.</small>`;
             console.error(error);
         } finally {
             btn.disabled = false;
