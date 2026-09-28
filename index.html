@@ -6,13 +6,13 @@
     <title>LinkedIn Franchise Outreach Assistant</title>
     <style>
         :root {
-            --bg-color: #0b0f19; /* Pure deep dark background */
-            --card-bg: #111827; /* Dark gray container card */
-            --primary: #0077b5; /* LinkedIn Blue */
+            --bg-color: #0b0f19; 
+            --card-bg: #111827; 
+            --primary: #0077b5; 
             --primary-hover: #005582;
-            --text: #f3f4f6; /* Bright white/gray text for high contrast */
+            --text: #f3f4f6; 
             --sub-text: #9ca3af;
-            --border: #374151; /* Dark gray subtle borders */
+            --border: #374151; 
         }
 
         body {
@@ -42,6 +42,18 @@
             text-align: center;
         }
 
+        .status-banner {
+            background: #1e293b;
+            border: 1px solid var(--primary);
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            color: #38bdf8;
+            text-align: center;
+        }
+
         .config-bar {
             background: #1f2937;
             padding: 15px;
@@ -60,18 +72,13 @@
             color: var(--text);
         }
 
-        select, input {
+        select {
             padding: 8px 12px;
             border: 1px solid var(--border);
             border-radius: 6px;
             font-size: 14px;
             background-color: #111827;
             color: var(--text);
-        }
-
-        select:focus, input:focus {
-            outline: none;
-            border-color: var(--primary);
         }
 
         .search-box {
@@ -92,11 +99,6 @@
             box-sizing: border-box;
             background-color: #1f2937;
             color: var(--text);
-        }
-
-        textarea:focus {
-            outline: none;
-            border-color: var(--primary);
         }
 
         button {
@@ -132,9 +134,10 @@
         }
 
         .loading {
-            color: #9ca3af;
+            color: #38bdf8;
             font-style: italic;
             text-align: center;
+            font-weight: bold;
         }
         
         .error {
@@ -143,6 +146,7 @@
             padding: 15px;
             border-radius: 6px;
             border: 1px solid #7f1d1d;
+            font-family: monospace;
         }
     </style>
 </head>
@@ -150,6 +154,10 @@
 
 <div class="container">
     <h1>Franchise Ownership Outreach Assistant</h1>
+
+    <div class="status-banner">
+        ⚡ Direct Pipeline Mode Enabled
+    </div>
 
     <div class="config-bar">
         <div>
@@ -180,19 +188,18 @@
 
     <div class="search-box">
         <label for="profileData"><strong>Paste LinkedIn/Sales Navigator Profile Text or Active Thread here:</strong></label>
-        <textarea id="profileData" placeholder="Copy the entire layout text of the prospect's profile or paste the continuous active message history thread here..."></textarea>
+        <textarea id="profileData" placeholder="Paste target data details here..."></textarea>
         <button id="analyzeBtn" onclick="processOutreach()">Process Prospect Data</button>
     </div>
 
     <div id="output" class="result-box">Your personalized outreach or response handling layout will appear here...</div>
 </div>
 
-<script type="module">
-    import { GoogleGenAI } from "https://esm.run";
-
+<script>
+    // Direct network connection implementation bypassed from standard wrapper constraints
     const MY_API_KEY = "AQ.Ab8RN6la5c5LNALMhqt-9bon-AdYl_dKoJXvVWmK8CbevztqA";
 
-    window.processOutreach = async function() {
+    async function processOutreach() {
         const mode = document.getElementById('sessionMode').value;
         const client = document.getElementById('clientName').value;
         const profileText = document.getElementById('profileData').value.trim();
@@ -200,18 +207,18 @@
         const btn = document.getElementById('analyzeBtn');
 
         if (!profileText) {
-            alert('Please paste some text context from LinkedIn or your conversation thread first.');
+            alert('Please paste some text first.');
             return;
         }
 
         btn.disabled = true;
         outputDiv.className = "result-box loading";
-        outputDiv.innerText = `Executing system parameters for ${mode} session running under ${client}...`;
+        outputDiv.innerText = `Connecting directly to Google AI servers via REST...`;
 
-        try {
-            const ai = new GoogleGenAI({ apiKey: MY_API_KEY });
-            
-            const masterSystemPrompt = `You are a LinkedIn franchise ownership outreach assistant. Your role is to analyze prospect files or ongoing threads and apply the exact operational workflows provided.
+        // Direct endpoint targeting stable v1beta architecture matching the token generation sequence
+        const endpointUrl = `https://googleapis.com{MY_API_KEY}`;
+        
+        const systemPrompt = `You are a LinkedIn franchise ownership outreach assistant. Your role is to analyze prospect files or ongoing threads and apply the exact operational workflows provided.
 
 ACTIVE SESSION CONFIGURATION PARAMETERS:
 - Current Target Mode: ${mode}
