@@ -161,14 +161,13 @@
     <h1>Franchise Ownership Outreach Assistant</h1>
 
     <div class="status-banner" id="statusBanner">
-        🟢 System Active: Paste your OpenAI Key below to start
+        🔒 ENGINE DEPLOYING: KEY VALIDATION INITIALIZED
     </div>
 
-    <!-- Secure Local Memory Storage Input Area -->
     <div class="config-bar">
         <div style="display: flex; align-items: center; gap: 10px; width: 100%;">
-            <label for="apiKeyField">OpenAI API Key (sk-...):</label>
-            <input type="password" id="apiKeyField" placeholder="Paste your sk-proj-... key here" oninput="saveKeyLocal()">
+            <label for="apiKeyField">OpenAI API Key:</label>
+            <input type="password" id="apiKeyField" placeholder="Paste your sk-proj-... key here">
         </div>
     </div>
 
@@ -201,29 +200,45 @@
 
     <div class="search-box">
         <label for="profileData"><strong>Paste LinkedIn/Sales Navigator Profile Text or Active Thread here:</strong></label>
-        <textarea id="profileData" placeholder="Paste profile text here..."></textarea>
-        <button id="analyzeBtn" onclick="processOutreach()">Process Prospect Data</button>
+        <textarea id="profileData" placeholder="Paste target profile details here..."></textarea>
+        <button id="analyzeBtn">Process Prospect Data</button>
     </div>
 
     <div id="output" class="result-box">Your personalized outreach or response handling layout will appear here...</div>
 </div>
 
 <script>
-    // Automatically load the key from browser memory if it was saved before
+    // Independent event configuration model decoupled from root domain settings
     document.addEventListener("DOMContentLoaded", () => {
-        const savedKey = localStorage.getItem('user_openai_key');
+        const btn = document.getElementById('analyzeBtn');
+        const statusBanner = document.getElementById('statusBanner');
+        const keyField = document.getElementById('apiKeyField');
+        
+        statusBanner.innerText = "⚡ SYSTEM ENGINE ONLINE: Paste your key and click below";
+        statusBanner.style.color = "#38bdf8";
+
+        // Pull stored credentials independently of old paths
+        const savedKey = localStorage.getItem('user_openai_key_secure');
         if (savedKey) {
-            document.getElementById('apiKeyField').value = savedKey;
-            document.getElementById('statusBanner').innerText = "⚡ OpenAI Key loaded from secure local memory. Ready to process.";
+            keyField.value = savedKey;
+            statusBanner.innerText = "✅ SECURE TOKEN MOUNTED: Ready to process data profiles";
+            statusBanner.style.color = "#34a853";
+        }
+
+        // Lock values dynamically on change inputs
+        keyField.addEventListener("input", () => {
+            localStorage.setItem('user_openai_key_secure', keyField.value.trim());
+        });
+
+        if (btn) {
+            btn.addEventListener("click", async (e) => {
+                e.preventDefault();
+                await executePipeline();
+            });
         }
     });
 
-    function saveKeyLocal() {
-        const keyVal = document.getElementById('apiKeyField').value.trim();
-        localStorage.setItem('user_openai_key', keyVal);
-    }
-
-    async function processOutreach() {
+    async function executePipeline() {
         const userApiKey = document.getElementById('apiKeyField').value.trim();
         const mode = document.getElementById('sessionMode').value;
         const client = document.getElementById('clientName').value;
@@ -233,24 +248,23 @@
         const statusBanner = document.getElementById('statusBanner');
 
         if (!userApiKey) {
-            alert('Please paste your OpenAI API Key into the field at the top first.');
+            alert('Please paste your OpenAI API Key into the input field at the top first.');
             return;
         }
 
         if (!profileText) {
-            alert('Please paste some profile layout text first.');
+            alert('Please paste some text data into the main field first.');
             return;
         }
 
         btn.disabled = true;
-        statusBanner.innerText = "⏳ STEP 1/3: Packing outreach business logic directives...";
+        statusBanner.innerText = "⏳ PROCESSING STEP 1/2: Submitting data pack to OpenAI Cloud routing...";
         statusBanner.style.color = "#fbbf24";
-        statusBanner.style.borderColor = "#fbbf24";
         
         outputDiv.className = "result-box loading";
-        outputDiv.innerText = "Connecting to OpenAI servers...";
+        outputDiv.innerText = "Connecting directly to standard chat completions pipeline endpoint...";
 
-        const systemPrompt = `You are a LinkedIn franchise ownership outreach assistant. Your role is to analyze prospect files or ongoing threads and apply the exact operational workflows provided.
+        const masterPromptInstructions = `You are a LinkedIn franchise ownership outreach assistant. Your role is to analyze prospect files or ongoing threads and apply the exact operational workflows provided.
 
 ACTIVE SESSION CONFIGURATION PARAMETERS:
 - Current Target Mode: ${mode}
@@ -265,15 +279,3 @@ CRITICAL Geography Exclusion: Exclude completely if profile indicates location i
 CRITICAL Industry/Role Exclusion: EXCLUDE any prospect who is a franchise broker, franchise consultant, franchise advisor, franchise broker network member, or business broker. Do NOT pitch individuals whose business model involves helping others buy franchises or businesses or provides advisory services.
 Other Move On triggers: Insufficient seniority, explicitly states no franchise/sales inquiries, sitting elected official, or completely irrelevant profile.
 
-When Unsuitable Criterion is met, output ONLY:
-🔴 MOVE ON
-[One short sentence explaining the exact reason.]
-
-=================================
-2. FIT SCORE FORMATTING
-=================================
-For qualified entries, structure the top evaluation exactly like this:
-🟢 EXCELLENT FIT | 9.X/10  (or STRONG FIT | 9.X/10, GOOD FIT | 8.X/10, MODERATE FIT | 7.X/10 depending on criteria layout match)
-Why: [1-2 short sentences highlighting ownership history, seniority, P&L background, or career transition context.]
-
-=================================
