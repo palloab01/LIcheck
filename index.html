@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LinkedIn Profile AI Analyzer</title>
+    <style>
+        :root {
+            --bg-color: #f4f6f9;
+            --card-bg: #ffffff;
+            --primary: #0077b5; /* LinkedIn Blue */
+            --primary-hover: #005582;
+            --text: #333333;
+            --border: #e0e0e0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        h1 {
+            margin-top: 0;
+            color: var(--primary);
+            font-size: 24px;
+            text-align: center;
+        }
+
+        .api-section {
+            background: #fdf6e2;
+            border: 1px solid #f5e0b3;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .api-section input {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .search-box {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+
+        textarea {
+            width: 100%;
+            height: 180px;
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 15px;
+            resize: vertical;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background-color: var(--primary-hover);
+        }
+
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+
+        .result-box {
+            border-top: 2px solid var(--bg-color);
+            padding-top: 20px;
+            margin-top: 20px;
+            min-height: 100px;
+            white-space: pre-wrap; /* Preserves formatting from AI */
+            line-height: 1.6;
+        }
+
+        .loading {
+            color: #666;
+            font-style: italic;
+            text-align: center;
+        }
+        
+        .error {
+            color: #d93025;
+            background: #fce8e6;
+            padding: 10px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>LinkedIn Profile AI Analyzer</h1>
+
+    <!-- Security Step: API key is saved locally in your browser, never pushed to GitHub -->
+    <div class="api-section">
+        <label for="apiKey"><strong>Gemini API Key:</strong></label>
+        <input type="password" id="apiKey" placeholder="AIzaSy..." oninput="saveApiKey()">
+        <small style="color: #666;">Stored locally in your browser</small>
+    </div>
+
+    <!-- Main Analysis Section -->
+    <div class="search-box">
+        <label for="profileData"><strong>Paste LinkedIn Profile Data / Text here:</strong></label>
+        <textarea id="profileData" placeholder="Go to a LinkedIn profile, press Ctrl+A (or Cmd+A) to copy everything, and paste it here..."></textarea>
+        <button id="analyzeBtn" onclick="analyzeProfile()">Analyze Profile</button>
+    </div>
+
+    <div id="output" class="result-box">Your analysis will appear here...</div>
+</div>
+
+<script type="importmap">
+  {
+    "imports": {
+      "@google/generative-ai": "https://esm.run"
+    }
+  }
+</script>
+
+<script type="module">
+    import { GoogleGenAI } from "@google/generative-ai";
+
+    // Load API Key from local storage if it exists
+    window.addEventListener('DOMContentLoaded', () => {
+        const savedKey = localStorage.getItem('gemini_api_key');
+        if (savedKey) {
+            document.getElementById('apiKey').value = savedKey;
+        }
+    });
+
+    // Save key locally on change
+    window.saveApiKey = function() {
+        const key = document.getElementById('apiKey').value.trim();
+        localStorage.setItem('gemini_api_key', key);
+    }
+
+    // Call Gemini API
+    window.analyzeProfile = async function() {
+        const apiKey = document.getElementById('apiKey').value.trim();
+        const profileText = document.getElementById('profileData').value.trim();
+        const outputDiv = document.getElementById('output');
+        const btn = document.getElementById('analyzeBtn');
+
+        if (!apiKey) {
+            alert('Please enter your Google Gemini API key first.');
+            return;
+        }
+        if (!profileText) {
+            alert('Please paste some LinkedIn profile text to analyze.');
+            return;
+        }
+
+        // UI Feedback
+        btn.disabled = true;
+        outputDiv.className = "result-box loading";
+        outputDiv.innerText = "Analyzing profile data with Google AI...";
+
+        try {
+            const ai = new GoogleGenAI({ apiKey: apiKey });
+            // Using gemini-2.5-flash as it is lightning fast and great at summaries
+            const model = ai.getGenerativeModel({ model: "gemini-2.5-flash" });
+
+            const prompt = `You are an expert recruiter and corporate headhunter. Analyze the following raw LinkedIn profile text and provide a professional, structured overview. Include:
+1. Candidate Summary (Name, current title, and 2-sentence elevator pitch)
+2. Core Technical & Soft Skills
+3. Career Highlights & Strongest Achievements
+4. Ideal Job Roles or Opportunities they would be perfect for
+
+Here is the profile text:
+${profileText}`;
+
+            const result = await model.generateContent(prompt);
+            const responseText = result.response.text();
+            
+            outputDiv.className = "result-box";
+            outputDiv.innerText = responseText;
+
+        } catch (error) {
+            outputDiv.className = "result-box error";
+            outputDiv.innerText = `Error: ${error.message}\nPlease double-check your API key and connection.`;
+            console.error(error);
+        } finally {
+            btn.disabled = false;
+        }
+    }
+</script>
+
+</body>
+</html>
