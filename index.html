@@ -72,13 +72,18 @@
             color: var(--text);
         }
 
-        select {
+        select, input[type="password"] {
             padding: 8px 12px;
             border: 1px solid var(--border);
             border-radius: 6px;
             font-size: 14px;
             background-color: #111827;
             color: var(--text);
+        }
+
+        input[type="password"] {
+            flex: 1;
+            min-width: 200px;
         }
 
         .search-box {
@@ -156,7 +161,15 @@
     <h1>Franchise Ownership Outreach Assistant</h1>
 
     <div class="status-banner" id="statusBanner">
-        🔒 INITIALIZING OPENAI INTERFACE ENGINE
+        🟢 System Active: Paste your OpenAI Key below to start
+    </div>
+
+    <!-- Secure Local Memory Storage Input Area -->
+    <div class="config-bar">
+        <div style="display: flex; align-items: center; gap: 10px; width: 100%;">
+            <label for="apiKeyField">OpenAI API Key (sk-...):</label>
+            <input type="password" id="apiKeyField" placeholder="Paste your sk-proj-... key here" oninput="saveKeyLocal()">
+        </div>
     </div>
 
     <div class="config-bar">
@@ -188,33 +201,30 @@
 
     <div class="search-box">
         <label for="profileData"><strong>Paste LinkedIn/Sales Navigator Profile Text or Active Thread here:</strong></label>
-        <textarea id="profileData" placeholder="Paste target profile details here..."></textarea>
-        <button id="analyzeBtn">Process Prospect Data</button>
+        <textarea id="profileData" placeholder="Paste profile text here..."></textarea>
+        <button id="analyzeBtn" onclick="processOutreach()">Process Prospect Data</button>
     </div>
 
     <div id="output" class="result-box">Your personalized outreach or response handling layout will appear here...</div>
 </div>
 
 <script>
-    // OpenAI API Key pre-configured inside the code [1]
-    const OPENAI_API_KEY = "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";
-
+    // Automatically load the key from browser memory if it was saved before
     document.addEventListener("DOMContentLoaded", () => {
-        const btn = document.getElementById('analyzeBtn');
-        const statusBanner = document.getElementById('statusBanner');
-        
-        statusBanner.innerText = "⚡ OPENAI ENGINE READY: Click below to process";
-        statusBanner.style.color = "#38bdf8";
-        statusBanner.style.borderColor = "#0077b5";
-
-        if (btn) {
-            btn.addEventListener("click", async () => {
-                await processOutreach();
-            });
+        const savedKey = localStorage.getItem('user_openai_key');
+        if (savedKey) {
+            document.getElementById('apiKeyField').value = savedKey;
+            document.getElementById('statusBanner').innerText = "⚡ OpenAI Key loaded from secure local memory. Ready to process.";
         }
     });
 
+    function saveKeyLocal() {
+        const keyVal = document.getElementById('apiKeyField').value.trim();
+        localStorage.setItem('user_openai_key', keyVal);
+    }
+
     async function processOutreach() {
+        const userApiKey = document.getElementById('apiKeyField').value.trim();
         const mode = document.getElementById('sessionMode').value;
         const client = document.getElementById('clientName').value;
         const profileText = document.getElementById('profileData').value.trim();
@@ -222,18 +232,23 @@
         const btn = document.getElementById('analyzeBtn');
         const statusBanner = document.getElementById('statusBanner');
 
+        if (!userApiKey) {
+            alert('Please paste your OpenAI API Key into the field at the top first.');
+            return;
+        }
+
         if (!profileText) {
-            alert('Please paste some text first.');
+            alert('Please paste some profile layout text first.');
             return;
         }
 
         btn.disabled = true;
-        statusBanner.innerText = "⏳ STEP 1/3: Click Registered! Processing business variables...";
+        statusBanner.innerText = "⏳ STEP 1/3: Packing outreach business logic directives...";
         statusBanner.style.color = "#fbbf24";
         statusBanner.style.borderColor = "#fbbf24";
         
         outputDiv.className = "result-box loading";
-        outputDiv.innerText = "Formatting prompt instructions for ChatGPT...";
+        outputDiv.innerText = "Connecting to OpenAI servers...";
 
         const systemPrompt = `You are a LinkedIn franchise ownership outreach assistant. Your role is to analyze prospect files or ongoing threads and apply the exact operational workflows provided.
 
@@ -262,11 +277,3 @@ For qualified entries, structure the top evaluation exactly like this:
 Why: [1-2 short sentences highlighting ownership history, seniority, P&L background, or career transition context.]
 
 =================================
-3. OPERATIONAL EXECUTION BY ACTIVE SESSION MODE
-=================================
-Apply the instructions corresponding ONLY to the active target mode: [${mode}]
-
-If mode is [INVITE]:
-- Structure: Output Fit Score block, then text "Invite:" followed by the Connection Request copy.
-- Rules: STRICT maximum 290 characters total for the copy. Warm, professional, peer-to-peer, simple English. Naturally mention franchise ownership. Do NOT make it sound like a mass template. Do NOT repeat "caught my attention." Use variations like "stood out," "interesting journey," "your experience building..."
-
