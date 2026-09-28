@@ -45,7 +45,7 @@
         .status-banner {
             background: #1e293b;
             border: 1px solid var(--primary);
-            padding: 10px;
+            padding: 12px;
             border-radius: 6px;
             margin-bottom: 20px;
             font-size: 14px;
@@ -110,7 +110,6 @@
             font-weight: 600;
             border-radius: 6px;
             cursor: pointer;
-            transition: background 0.2s;
         }
 
         button:hover {
@@ -134,14 +133,14 @@
         }
 
         .loading {
-            color: #38bdf8;
+            color: #fbbf24 !important;
             font-style: italic;
             text-align: center;
             font-weight: bold;
         }
         
         .error {
-            color: #f87171;
+            color: #f87171 !important;
             background: #7f1d1d33;
             padding: 15px;
             border-radius: 6px;
@@ -157,7 +156,7 @@
     <h1>Franchise Ownership Outreach Assistant</h1>
 
     <div class="status-banner" id="statusBanner">
-        🟢 Web App Interface Ready
+        🔒 INITIALIZING OPENAI INTERFACE ENGINE
     </div>
 
     <div class="config-bar">
@@ -190,14 +189,30 @@
     <div class="search-box">
         <label for="profileData"><strong>Paste LinkedIn/Sales Navigator Profile Text or Active Thread here:</strong></label>
         <textarea id="profileData" placeholder="Paste target profile details here..."></textarea>
-        <button id="analyzeBtn" onclick="processOutreach()">Process Prospect Data</button>
+        <button id="analyzeBtn">Process Prospect Data</button>
     </div>
 
     <div id="output" class="result-box">Your personalized outreach or response handling layout will appear here...</div>
 </div>
 
 <script>
-    const MY_API_KEY = "AQ.Ab8RN6Ia5c5LNALMhqt-9bon-AdYl_dKoJXVWVmK8GbavzljqA";
+    // OpenAI API Key pre-configured inside the code [1]
+    const OPENAI_API_KEY = "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";
+
+    document.addEventListener("DOMContentLoaded", () => {
+        const btn = document.getElementById('analyzeBtn');
+        const statusBanner = document.getElementById('statusBanner');
+        
+        statusBanner.innerText = "⚡ OPENAI ENGINE READY: Click below to process";
+        statusBanner.style.color = "#38bdf8";
+        statusBanner.style.borderColor = "#0077b5";
+
+        if (btn) {
+            btn.addEventListener("click", async () => {
+                await processOutreach();
+            });
+        }
+    });
 
     async function processOutreach() {
         const mode = document.getElementById('sessionMode').value;
@@ -208,21 +223,18 @@
         const statusBanner = document.getElementById('statusBanner');
 
         if (!profileText) {
-            alert('Please paste some text into the box first.');
+            alert('Please paste some text first.');
             return;
         }
 
-        // STEP 1 VISUAL PROOF: Button was clicked, text changes, button disables
         btn.disabled = true;
-        statusBanner.innerText = "⏳ STEP 1: Button Clicked! Preparing request payload...";
+        statusBanner.innerText = "⏳ STEP 1/3: Click Registered! Processing business variables...";
         statusBanner.style.color = "#fbbf24";
         statusBanner.style.borderColor = "#fbbf24";
         
         outputDiv.className = "result-box loading";
-        outputDiv.innerText = `Preparing data for ${mode} session under ${client}...`;
+        outputDiv.innerText = "Formatting prompt instructions for ChatGPT...";
 
-        const endpointUrl = `https://googleapis.com{MY_API_KEY}`;
-        
         const systemPrompt = `You are a LinkedIn franchise ownership outreach assistant. Your role is to analyze prospect files or ongoing threads and apply the exact operational workflows provided.
 
 ACTIVE SESSION CONFIGURATION PARAMETERS:
@@ -258,9 +270,3 @@ If mode is [INVITE]:
 - Structure: Output Fit Score block, then text "Invite:" followed by the Connection Request copy.
 - Rules: STRICT maximum 290 characters total for the copy. Warm, professional, peer-to-peer, simple English. Naturally mention franchise ownership. Do NOT make it sound like a mass template. Do NOT repeat "caught my attention." Use variations like "stood out," "interesting journey," "your experience building..."
 
-If mode is [INMAIL]:
-- Structure: Output Fit Score block, then Subject, then Alt Subject, followed by the Message Copy.
-- Rules: Message length should be around 3 short paragraphs. Use "We work with a client..." framework for initial outreach. Keep tone clean, simple, and tailored to their career context.
-
-If mode is [DM]:
-- Rules: If original invite already brought up franchise ownership, do not repeat the full pitch. 
